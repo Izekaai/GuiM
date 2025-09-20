@@ -542,7 +542,7 @@ function NeverloseUI:CreateWindow(config)
             Slider.Frame = NeverloseUI:Create("Frame", {
                 Name = sliderName,
                 Parent = Tab.Content,
-                Size = UDim2.new(1, 0, 0, 50),
+                Size = UDim2.new(1, 0, 0, 55),
                 BackgroundColor3 = Theme.ButtonBg,
                 BorderSizePixel = 0
             })
@@ -553,10 +553,18 @@ function NeverloseUI:CreateWindow(config)
                 CornerRadius = UDim.new(0, 4)
             })
             
+            -- Subtle border
+            local border = NeverloseUI:Create("UIStroke", {
+                Parent = Slider.Frame,
+                Color = Theme.BorderColor,
+                Thickness = 1,
+                Transparency = 0.8
+            })
+            
             Slider.Label = NeverloseUI:Create("TextLabel", {
                 Parent = Slider.Frame,
-                Position = UDim2.new(0, 15, 0, 5),
-                Size = UDim2.new(1, -30, 0, 20),
+                Position = UDim2.new(0, 15, 0, 8),
+                Size = UDim2.new(1, -80, 0, 18),
                 BackgroundTransparency = 1,
                 Font = Enum.Font.Gotham,
                 Text = sliderName,
@@ -566,23 +574,38 @@ function NeverloseUI:CreateWindow(config)
             })
             table.insert(Objects.TextColor, Slider.Label)
             
-            Slider.ValueLabel = NeverloseUI:Create("TextLabel", {
+            -- Value input box
+            Slider.ValueInput = NeverloseUI:Create("TextBox", {
                 Parent = Slider.Frame,
-                Position = UDim2.new(1, -15, 0, 5),
-                Size = UDim2.new(0, 0, 0, 20),
-                BackgroundTransparency = 1,
-                Font = Enum.Font.Gotham,
+                Position = UDim2.new(1, -70, 0, 5),
+                Size = UDim2.new(0, 55, 0, 24),
+                BackgroundColor3 = Theme.InputBg,
+                BorderSizePixel = 0,
+                Font = Enum.Font.GothamMedium,
                 Text = tostring(defaultValue),
                 TextColor3 = Theme.AccentColor,
-                TextSize = 13,
-                TextXAlignment = Enum.TextXAlignment.Right
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Center
             })
-            table.insert(Objects.AccentColor, Slider.ValueLabel)
+            table.insert(Objects.AccentColor, Slider.ValueInput)
             
+            NeverloseUI:Create("UICorner", {
+                Parent = Slider.ValueInput,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Slider.ValueInput,
+                Color = Theme.AccentColor,
+                Thickness = 1,
+                Transparency = 0.7
+            })
+            
+            -- Track background
             Slider.Track = NeverloseUI:Create("Frame", {
                 Parent = Slider.Frame,
-                Position = UDim2.new(0, 15, 0, 30),
-                Size = UDim2.new(1, -30, 0, 4),
+                Position = UDim2.new(0, 15, 0, 35),
+                Size = UDim2.new(1, -30, 0, 6),
                 BackgroundColor3 = Theme.BorderColor,
                 BorderSizePixel = 0
             })
@@ -592,6 +615,7 @@ function NeverloseUI:CreateWindow(config)
                 CornerRadius = UDim.new(1, 0)
             })
             
+            -- Fill bar
             Slider.Fill = NeverloseUI:Create("Frame", {
                 Parent = Slider.Track,
                 Size = UDim2.new((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0),
@@ -605,31 +629,64 @@ function NeverloseUI:CreateWindow(config)
                 CornerRadius = UDim.new(1, 0)
             })
             
+            -- Slider knob
+            Slider.Knob = NeverloseUI:Create("Frame", {
+                Parent = Slider.Track,
+                Position = UDim2.new((defaultValue - minValue) / (maxValue - minValue), -6, 0, -3),
+                Size = UDim2.new(0, 12, 0, 12),
+                BackgroundColor3 = Theme.TextColor,
+                BorderSizePixel = 0
+            })
+            table.insert(Objects.TextColor, Slider.Knob)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Slider.Knob,
+                CornerRadius = UDim.new(1, 0)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Slider.Knob,
+                Color = Theme.AccentColor,
+                Thickness = 2
+            })
+            
             Slider.Value = defaultValue
             local dragging = false
             
-            local function UpdateSlider(input)
-                local percent = math.clamp((input.Position.X - Slider.Track.AbsolutePosition.X) / Slider.Track.AbsoluteSize.X, 0, 1)
+            local function UpdateSlider(percent, fromInput)
+                percent = math.clamp(percent, 0, 1)
                 Slider.Value = math.floor(minValue + (maxValue - minValue) * percent)
-                Slider.ValueLabel.Text = tostring(Slider.Value)
+                
+                if not fromInput then
+                    Slider.ValueInput.Text = tostring(Slider.Value)
+                end
                 
                 NeverloseUI:Tween(Slider.Fill, TweenInfo.new(0.1), {
                     Size = UDim2.new(percent, 0, 1, 0)
                 }):Play()
                 
+                NeverloseUI:Tween(Slider.Knob, TweenInfo.new(0.1), {
+                    Position = UDim2.new(percent, -6, 0, -3)
+                }):Play()
+                
                 if callback then callback(Slider.Value) end
+            end
+            
+            local function HandleInput(input)
+                local percent = math.clamp((input.Position.X - Slider.Track.AbsolutePosition.X) / Slider.Track.AbsoluteSize.X, 0, 1)
+                UpdateSlider(percent)
             end
             
             Slider.Track.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     dragging = true
-                    UpdateSlider(input)
+                    HandleInput(input)
                 end
             end)
             
             UserInputService.InputChanged:Connect(function(input)
                 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    UpdateSlider(input)
+                    HandleInput(input)
                 end
             end)
             
@@ -639,9 +696,386 @@ function NeverloseUI:CreateWindow(config)
                 end
             end)
             
-            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 60)
+            -- Handle direct input
+            Slider.ValueInput.FocusLost:Connect(function()
+                local value = tonumber(Slider.ValueInput.Text)
+                if value then
+                    value = math.clamp(value, minValue, maxValue)
+                    local percent = (value - minValue) / (maxValue - minValue)
+                    UpdateSlider(percent, true)
+                else
+                    Slider.ValueInput.Text = tostring(Slider.Value)
+                end
+            end)
+            
+            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 65)
             
             return Slider
+        end
+        
+        function Tab:CreateKeybind(keybindName, defaultKey, callback)
+            local Keybind = {}
+            
+            Keybind.Frame = NeverloseUI:Create("Frame", {
+                Name = keybindName,
+                Parent = Tab.Content,
+                Size = UDim2.new(1, 0, 0, 50),
+                BackgroundColor3 = Theme.ButtonBg,
+                BorderSizePixel = 0
+            })
+            table.insert(Objects.ButtonBg, Keybind.Frame)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Keybind.Frame,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Keybind.Frame,
+                Color = Theme.BorderColor,
+                Thickness = 1,
+                Transparency = 0.8
+            })
+            
+            Keybind.Label = NeverloseUI:Create("TextLabel", {
+                Parent = Keybind.Frame,
+                Position = UDim2.new(0, 15, 0, 8),
+                Size = UDim2.new(1, -120, 0, 18),
+                BackgroundTransparency = 1,
+                Font = Enum.Font.Gotham,
+                Text = keybindName,
+                TextColor3 = Theme.TextColor,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            table.insert(Objects.TextColor, Keybind.Label)
+            
+            -- Key display button
+            Keybind.KeyButton = NeverloseUI:Create("TextButton", {
+                Parent = Keybind.Frame,
+                Position = UDim2.new(1, -105, 0, 12),
+                Size = UDim2.new(0, 90, 0, 26),
+                BackgroundColor3 = Theme.InputBg,
+                BorderSizePixel = 0,
+                Font = Enum.Font.GothamMedium,
+                Text = defaultKey and defaultKey.Name or "None",
+                TextColor3 = Theme.AccentColor,
+                TextSize = 12
+            })
+            table.insert(Objects.AccentColor, Keybind.KeyButton)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Keybind.KeyButton,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Keybind.KeyButton,
+                Color = Theme.AccentColor,
+                Thickness = 1,
+                Transparency = 0.6
+            })
+            
+            Keybind.CurrentKey = defaultKey
+            Keybind.Recording = false
+            local inputConnection = nil
+            local keyConnection = nil
+            
+            -- Key recording functionality
+            Keybind.KeyButton.MouseButton1Click:Connect(function()
+                if Keybind.Recording then return end
+                
+                Keybind.Recording = true
+                Keybind.KeyButton.Text = "Press any key..."
+                Keybind.KeyButton.TextColor3 = Theme.TextColor
+                
+                -- Animate button to show recording state
+                NeverloseUI:Tween(Keybind.KeyButton, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Theme.AccentColor
+                }):Play()
+                
+                inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    
+                    if input.UserInputType == Enum.UserInputType.Keyboard then
+                        if input.KeyCode == Enum.KeyCode.Escape then
+                            -- Clear keybind
+                            Keybind.CurrentKey = nil
+                            Keybind.KeyButton.Text = "None"
+                        else
+                            -- Set new keybind
+                            Keybind.CurrentKey = input.KeyCode
+                            Keybind.KeyButton.Text = input.KeyCode.Name
+                        end
+                        
+                        Keybind.Recording = false
+                        Keybind.KeyButton.TextColor3 = Theme.AccentColor
+                        
+                        NeverloseUI:Tween(Keybind.KeyButton, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Theme.InputBg
+                        }):Play()
+                        
+                        if inputConnection then
+                            inputConnection:Disconnect()
+                            inputConnection = nil
+                        end
+                        
+                        -- Setup key detection
+                        if keyConnection then
+                            keyConnection:Disconnect()
+                        end
+                        
+                        if Keybind.CurrentKey then
+                            keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
+                                if processed then return end
+                                if keyInput.KeyCode == Keybind.CurrentKey then
+                                    if callback then callback(Keybind.CurrentKey) end
+                                end
+                            end)
+                        end
+                    end
+                end)
+                
+                -- Auto-cancel after 5 seconds
+                game:GetService("Debris"):AddItem(spawn(function()
+                    wait(5)
+                    if Keybind.Recording then
+                        Keybind.Recording = false
+                        Keybind.KeyButton.Text = Keybind.CurrentKey and Keybind.CurrentKey.Name or "None"
+                        Keybind.KeyButton.TextColor3 = Theme.AccentColor
+                        NeverloseUI:Tween(Keybind.KeyButton, TweenInfo.new(0.2), {
+                            BackgroundColor3 = Theme.InputBg
+                        }):Play()
+                        
+                        if inputConnection then
+                            inputConnection:Disconnect()
+                            inputConnection = nil
+                        end
+                    end
+                end), 0)
+            end)
+            
+            -- Setup initial key detection if default key exists
+            if defaultKey then
+                keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
+                    if processed then return end
+                    if keyInput.KeyCode == Keybind.CurrentKey then
+                        if callback then callback(Keybind.CurrentKey) end
+                    end
+                end)
+            end
+            
+            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 60)
+            
+            return Keybind
+        end
+        
+        function Tab:CreateDropdown(dropdownName, options, defaultOption, callback)
+            local Dropdown = {}
+            options = options or {}
+            
+            Dropdown.Frame = NeverloseUI:Create("Frame", {
+                Name = dropdownName,
+                Parent = Tab.Content,
+                Size = UDim2.new(1, 0, 0, 50),
+                BackgroundColor3 = Theme.ButtonBg,
+                BorderSizePixel = 0,
+                ClipsDescendants = false
+            })
+            table.insert(Objects.ButtonBg, Dropdown.Frame)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Dropdown.Frame,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Dropdown.Frame,
+                Color = Theme.BorderColor,
+                Thickness = 1,
+                Transparency = 0.8
+            })
+            
+            Dropdown.Label = NeverloseUI:Create("TextLabel", {
+                Parent = Dropdown.Frame,
+                Position = UDim2.new(0, 15, 0, 8),
+                Size = UDim2.new(1, -30, 0, 18),
+                BackgroundTransparency = 1,
+                Font = Enum.Font.Gotham,
+                Text = dropdownName,
+                TextColor3 = Theme.TextColor,
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            table.insert(Objects.TextColor, Dropdown.Label)
+            
+            -- Main dropdown button
+            Dropdown.Button = NeverloseUI:Create("TextButton", {
+                Parent = Dropdown.Frame,
+                Position = UDim2.new(0, 15, 0, 25),
+                Size = UDim2.new(1, -30, 0, 20),
+                BackgroundColor3 = Theme.InputBg,
+                BorderSizePixel = 0,
+                Font = Enum.Font.Gotham,
+                Text = defaultOption or (options[1] or "Select..."),
+                TextColor3 = Theme.TextColor,
+                TextSize = 12,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            table.insert(Objects.InputBg, Dropdown.Button)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Dropdown.Button,
+                CornerRadius = UDim.new(0, 3)
+            })
+            
+            NeverloseUI:Create("UIPadding", {
+                Parent = Dropdown.Button,
+                PaddingLeft = UDim.new(0, 10)
+            })
+            
+            -- Dropdown arrow
+            Dropdown.Arrow = NeverloseUI:Create("TextLabel", {
+                Parent = Dropdown.Button,
+                Position = UDim2.new(1, -20, 0, 0),
+                Size = UDim2.new(0, 20, 1, 0),
+                BackgroundTransparency = 1,
+                Font = Enum.Font.GothamBold,
+                Text = "▼",
+                TextColor3 = Theme.AccentColor,
+                TextSize = 10,
+                TextXAlignment = Enum.TextXAlignment.Center
+            })
+            table.insert(Objects.AccentColor, Dropdown.Arrow)
+            
+            -- Options container
+            Dropdown.OptionsFrame = NeverloseUI:Create("Frame", {
+                Parent = Dropdown.Frame,
+                Position = UDim2.new(0, 15, 0, 45),
+                Size = UDim2.new(1, -30, 0, 0),
+                BackgroundColor3 = Theme.ContentBg,
+                BorderSizePixel = 0,
+                ClipsDescendants = true,
+                ZIndex = 10
+            })
+            table.insert(Objects.ContentBg, Dropdown.OptionsFrame)
+            
+            NeverloseUI:Create("UICorner", {
+                Parent = Dropdown.OptionsFrame,
+                CornerRadius = UDim.new(0, 4)
+            })
+            
+            NeverloseUI:Create("UIStroke", {
+                Parent = Dropdown.OptionsFrame,
+                Color = Theme.AccentColor,
+                Thickness = 1,
+                Transparency = 0.7
+            })
+            
+            NeverloseUI:Create("UIListLayout", {
+                Parent = Dropdown.OptionsFrame,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 2)
+            })
+            
+            NeverloseUI:Create("UIPadding", {
+                Parent = Dropdown.OptionsFrame,
+                PaddingTop = UDim.new(0, 5),
+                PaddingBottom = UDim.new(0, 5),
+                PaddingLeft = UDim.new(0, 5),
+                PaddingRight = UDim.new(0, 5)
+            })
+            
+            Dropdown.IsOpen = false
+            Dropdown.SelectedValue = defaultOption or options[1]
+            
+            local function CreateOptions()
+                -- Clear existing options
+                for _, child in pairs(Dropdown.OptionsFrame:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
+                
+                for _, option in pairs(options) do
+                    local optionButton = NeverloseUI:Create("TextButton", {
+                        Parent = Dropdown.OptionsFrame,
+                        Size = UDim2.new(1, 0, 0, 25),
+                        BackgroundColor3 = Theme.ButtonBg,
+                        BorderSizePixel = 0,
+                        Font = Enum.Font.Gotham,
+                        Text = option,
+                        TextColor3 = Theme.TextColor,
+                        TextSize = 11,
+                        TextXAlignment = Enum.TextXAlignment.Left
+                    })
+                    
+                    NeverloseUI:Create("UICorner", {
+                        Parent = optionButton,
+                        CornerRadius = UDim.new(0, 3)
+                    })
+                    
+                    NeverloseUI:Create("UIPadding", {
+                        Parent = optionButton,
+                        PaddingLeft = UDim.new(0, 8)
+                    })
+                    
+                    -- Highlight selected option
+                    if option == Dropdown.SelectedValue then
+                        optionButton.BackgroundColor3 = Theme.AccentColor
+                    end
+                    
+                    optionButton.MouseEnter:Connect(function()
+                        if option ~= Dropdown.SelectedValue then
+                            NeverloseUI:Tween(optionButton, TweenInfo.new(0.1), {BackgroundColor3 = Theme.HoverColor}):Play()
+                        end
+                    end)
+                    
+                    optionButton.MouseLeave:Connect(function()
+                        if option ~= Dropdown.SelectedValue then
+                            NeverloseUI:Tween(optionButton, TweenInfo.new(0.1), {BackgroundColor3 = Theme.ButtonBg}):Play()
+                        end
+                    end)
+                    
+                    optionButton.MouseButton1Click:Connect(function()
+                        Dropdown.SelectedValue = option
+                        Dropdown.Button.Text = option
+                        
+                        -- Close dropdown
+                        Dropdown.IsOpen = false
+                        NeverloseUI:Tween(Dropdown.OptionsFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -30, 0, 0)}):Play()
+                        NeverloseUI:Tween(Dropdown.Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+                        
+                        CreateOptions() -- Refresh to highlight new selection
+                        
+                        if callback then callback(option) end
+                    end)
+                end
+            end
+            
+            CreateOptions()
+            
+            Dropdown.Button.MouseButton1Click:Connect(function()
+                Dropdown.IsOpen = not Dropdown.IsOpen
+                
+                if Dropdown.IsOpen then
+                    local optionsHeight = math.min(#options * 27 + 10, 150) -- Max height of 150
+                    NeverloseUI:Tween(Dropdown.OptionsFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -30, 0, optionsHeight)}):Play()
+                    NeverloseUI:Tween(Dropdown.Arrow, TweenInfo.new(0.2), {Rotation = 180}):Play()
+                    
+                    -- Expand parent frame if needed
+                    local newFrameHeight = 50 + optionsHeight
+                    NeverloseUI:Tween(Dropdown.Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, newFrameHeight)}):Play()
+                else
+                    NeverloseUI:Tween(Dropdown.OptionsFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -30, 0, 0)}):Play()
+                    NeverloseUI:Tween(Dropdown.Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+                    NeverloseUI:Tween(Dropdown.Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 50)}):Play()
+                end
+            end)
+            
+            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 60)
+            
+            return Dropdown
         end
         
         function Tab:CreateTextbox(textboxName, placeholderText, callback)
