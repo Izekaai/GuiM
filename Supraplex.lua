@@ -934,6 +934,10 @@ function NeverloseUI:CreateWindow(config)
             Keybind.Recording = false
             local inputConnection = nil
             local keyConnection = nil
+            local holdConnection = nil
+            local isKeyDown = false
+            local lastTriggerTime = 0
+            local triggerInterval = 0.05  -- Time between triggers while holding
             
             local function UpdateKeyDisplay()
                 if Keybind.CurrentKey then
@@ -1020,34 +1024,62 @@ function NeverloseUI:CreateWindow(config)
                     if keyConnection then
                         keyConnection:Disconnect()
                     end
+                    if holdConnection then
+                        holdConnection:Disconnect()
+                    end
                     if Keybind.CurrentKey then
-                        keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
-                            if processed then return end
+                        -- For keyboard keys
+                        if Keybind.CurrentKey ~= Enum.UserInputType.MouseButton2 then
+                            keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
+                                if processed then return end
+                                if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
+                                   keyInput.KeyCode == Keybind.CurrentKey then
+                                    -- Visual feedback when key is pressed
+                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                                        BackgroundColor3 = Theme.AccentColor
+                                    }):Play()
+                                    wait(0.1)
+                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                                        BackgroundColor3 = Theme.InputBg
+                                    }):Play()
+                                    if callback then callback(Keybind.CurrentKey) end
+                                end
+                            end)
+                        else
+                            -- For right mouse button
+                            keyConnection = UserInputService.InputBegan:Connect(function(input, processed)
+                                if processed then return end
+                                if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                                    -- Visual feedback when key is pressed
+                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                                        BackgroundColor3 = Theme.AccentColor
+                                    }):Play()
+                                    wait(0.1)
+                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                                        BackgroundColor3 = Theme.InputBg
+                                    }):Play()
+                                    if callback then callback(Keybind.CurrentKey) end
+                                end
+                            end)
+                        end
+                        
+                        -- Setup holding detection
+                        holdConnection = RunService.Heartbeat:Connect(function()
+                            local currentTime = tick()
+                            if currentTime - lastTriggerTime < triggerInterval then
+                                return
+                            end
                             
-                            -- Check for keyboard keys
-                            if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
-                               keyInput.KeyCode == Keybind.CurrentKey then
-                                -- Visual feedback when key is pressed
-                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
-                                    BackgroundColor3 = Theme.AccentColor
-                                }):Play()
-                                wait(0.1)
-                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
-                                    BackgroundColor3 = Theme.InputBg
-                                }):Play()
-                                if callback then callback(Keybind.CurrentKey) end
-                            -- Check for right mouse button
-                            elseif keyInput.UserInputType == Enum.UserInputType.MouseButton2 and 
-                                   Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
-                                -- Visual feedback when key is pressed
-                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
-                                    BackgroundColor3 = Theme.AccentColor
-                                }):Play()
-                                wait(0.1)
-                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
-                                    BackgroundColor3 = Theme.InputBg
-                                }):Play()
-                                if callback then callback(Keybind.CurrentKey) end
+                            if Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
+                                if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+                                    if callback then callback(Keybind.CurrentKey) end
+                                    lastTriggerTime = currentTime
+                                end
+                            else
+                                if UserInputService:IsKeyDown(Keybind.CurrentKey) then
+                                    if callback then callback(Keybind.CurrentKey) end
+                                    lastTriggerTime = currentTime
+                                end
                             end
                         end)
                     end
@@ -1091,33 +1123,56 @@ function NeverloseUI:CreateWindow(config)
             -- Setup initial key detection if default key exists
             UpdateKeyDisplay()
             if defaultKey then
-                keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
-                    if processed then return end
+                if defaultKey ~= Enum.UserInputType.MouseButton2 then
+                    keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
+                        if processed then return end
+                        if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
+                           keyInput.KeyCode == Keybind.CurrentKey then
+                            -- Visual feedback when key is pressed
+                            NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                                BackgroundColor3 = Theme.AccentColor
+                            }):Play()
+                            wait(0.1)
+                            NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                                BackgroundColor3 = Theme.InputBg
+                            }):Play()
+                            if callback then callback(Keybind.CurrentKey) end
+                        end
+                    end)
+                else
+                    keyConnection = UserInputService.InputBegan:Connect(function(input, processed)
+                        if processed then return end
+                        if input.UserInputType == Enum.UserInputType.MouseButton2 then
+                            -- Visual feedback when key is pressed
+                            NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                                BackgroundColor3 = Theme.AccentColor
+                            }):Play()
+                            wait(0.1)
+                            NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                                BackgroundColor3 = Theme.InputBg
+                            }):Play()
+                            if callback then callback(Keybind.CurrentKey) end
+                        end
+                    end)
+                end
+                
+                -- Setup holding detection
+                holdConnection = RunService.Heartbeat:Connect(function()
+                    local currentTime = tick()
+                    if currentTime - lastTriggerTime < triggerInterval then
+                        return
+                    end
                     
-                    -- Check for keyboard keys
-                    if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
-                       keyInput.KeyCode == Keybind.CurrentKey then
-                        -- Visual feedback when key is pressed
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
-                            BackgroundColor3 = Theme.AccentColor
-                        }):Play()
-                        wait(0.1)
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
-                            BackgroundColor3 = Theme.InputBg
-                        }):Play()
-                        if callback then callback(Keybind.CurrentKey) end
-                    -- Check for right mouse button
-                    elseif keyInput.UserInputType == Enum.UserInputType.MouseButton2 and 
-                           Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
-                        -- Visual feedback when key is pressed
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
-                            BackgroundColor3 = Theme.AccentColor
-                        }):Play()
-                        wait(0.1)
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
-                            BackgroundColor3 = Theme.InputBg
-                        }):Play()
-                        if callback then callback(Keybind.CurrentKey) end
+                    if Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
+                        if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+                            if callback then callback(Keybind.CurrentKey) end
+                            lastTriggerTime = currentTime
+                        end
+                    else
+                        if UserInputService:IsKeyDown(Keybind.CurrentKey) then
+                            if callback then callback(Keybind.CurrentKey) end
+                            lastTriggerTime = currentTime
+                        end
                     end
                 end)
             end
