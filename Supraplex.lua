@@ -913,7 +913,6 @@ function NeverLoseUI:CreateNotification(options)
     }):Play()
     
     -- Auto close after duration
-    local closeTimer = task.wait(duration)
     task.spawn(function()
         task.wait(duration)
         TweenService:Create(NotificationFrame, TweenInfo.new(0.3), {
@@ -927,8 +926,10 @@ function NeverLoseUI:CreateNotification(options)
         TweenService:Create(NotificationFrame, TweenInfo.new(0.3), {
             Position = UDim2.new(1, 10, 1, -90)
         }):Play()
-        task.wait(0.3)
-        NotificationGui:Destroy()
+        task.spawn(function()
+            task.wait(0.3)
+            NotificationGui:Destroy()
+        end)
     end)
 end
 
