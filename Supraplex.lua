@@ -1,7 +1,7 @@
 --[[
     Neverlose UI Library Template
+    Enhanced with Slider Value Display
     Inspired by Neverlose.cc interface design
-    Made for educational purposes only
 ]]
 
 local NeverloseUI = {}
@@ -542,7 +542,7 @@ function NeverloseUI:CreateWindow(config)
             Slider.Frame = NeverloseUI:Create("Frame", {
                 Name = sliderName,
                 Parent = Tab.Content,
-                Size = UDim2.new(1, 0, 0, 55),
+                Size = UDim2.new(1, 0, 0, 70), -- Increased height to accommodate value display
                 BackgroundColor3 = Theme.ButtonBg,
                 BorderSizePixel = 0
             })
@@ -561,6 +561,7 @@ function NeverloseUI:CreateWindow(config)
                 Transparency = 0.8
             })
             
+            -- Modified label to include value display
             Slider.Label = NeverloseUI:Create("TextLabel", {
                 Parent = Slider.Frame,
                 Position = UDim2.new(0, 15, 0, 8),
@@ -574,32 +575,19 @@ function NeverloseUI:CreateWindow(config)
             })
             table.insert(Objects.TextColor, Slider.Label)
             
-            -- Value input box
-            Slider.ValueInput = NeverloseUI:Create("TextBox", {
+            -- Value display label (shows current value)
+            Slider.ValueDisplay = NeverloseUI:Create("TextLabel", {
                 Parent = Slider.Frame,
-                Position = UDim2.new(1, -70, 0, 5),
-                Size = UDim2.new(0, 55, 0, 24),
-                BackgroundColor3 = Theme.InputBg,
-                BorderSizePixel = 0,
+                Position = UDim2.new(1, -70, 0, 8),
+                Size = UDim2.new(0, 55, 0, 18),
+                BackgroundTransparency = 1,
                 Font = Enum.Font.GothamMedium,
                 Text = tostring(defaultValue),
                 TextColor3 = Theme.AccentColor,
-                TextSize = 12,
-                TextXAlignment = Enum.TextXAlignment.Center
+                TextSize = 13,
+                TextXAlignment = Enum.TextXAlignment.Right
             })
-            table.insert(Objects.AccentColor, Slider.ValueInput)
-            
-            NeverloseUI:Create("UICorner", {
-                Parent = Slider.ValueInput,
-                CornerRadius = UDim.new(0, 3)
-            })
-            
-            NeverloseUI:Create("UIStroke", {
-                Parent = Slider.ValueInput,
-                Color = Theme.AccentColor,
-                Thickness = 1,
-                Transparency = 0.7
-            })
+            table.insert(Objects.AccentColor, Slider.ValueDisplay)
             
             -- Track background
             Slider.Track = NeverloseUI:Create("Frame", {
@@ -657,9 +645,8 @@ function NeverloseUI:CreateWindow(config)
                 percent = math.clamp(percent, 0, 1)
                 Slider.Value = math.floor(minValue + (maxValue - minValue) * percent)
                 
-                if not fromInput then
-                    Slider.ValueInput.Text = tostring(Slider.Value)
-                end
+                -- Update value display
+                Slider.ValueDisplay.Text = tostring(Slider.Value)
                 
                 NeverloseUI:Tween(Slider.Fill, TweenInfo.new(0.1), {
                     Size = UDim2.new(percent, 0, 1, 0)
@@ -696,19 +683,7 @@ function NeverloseUI:CreateWindow(config)
                 end
             end)
             
-            -- Handle direct input
-            Slider.ValueInput.FocusLost:Connect(function()
-                local value = tonumber(Slider.ValueInput.Text)
-                if value then
-                    value = math.clamp(value, minValue, maxValue)
-                    local percent = (value - minValue) / (maxValue - minValue)
-                    UpdateSlider(percent, true)
-                else
-                    Slider.ValueInput.Text = tostring(Slider.Value)
-                end
-            end)
-            
-            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 65)
+            Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 80)
             
             return Slider
         end
@@ -808,7 +783,7 @@ function NeverloseUI:CreateWindow(config)
                             Keybind.KeyButton.Text = input.KeyCode.Name
                         end
                         
-                        Keybind.Recording = false
+                        Keybind.Recoring = false
                         Keybind.KeyButton.TextColor3 = Theme.AccentColor
                         
                         NeverloseUI:Tween(Keybind.KeyButton, TweenInfo.new(0.2), {
