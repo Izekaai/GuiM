@@ -915,7 +915,7 @@ function NeverloseUI:CreateWindow(config)
                 BackgroundColor3 = Theme.InputBg,
                 BorderSizePixel = 0,
                 Font = Enum.Font.GothamBold,
-                Text = defaultKey and defaultKey.Name or "NONE",
+                Text = defaultKey and (defaultKey == Enum.UserInputType.MouseButton2 and "RIGHT CLICK" or defaultKey.Name) or "NONE",
                 TextColor3 = defaultKey and Theme.AccentColor or Theme.SubTextColor,
                 TextSize = 13,
                 AutoButtonColor = false
@@ -934,9 +934,16 @@ function NeverloseUI:CreateWindow(config)
             Keybind.Recording = false
             local inputConnection = nil
             local keyConnection = nil
+            
             local function UpdateKeyDisplay()
                 if Keybind.CurrentKey then
-                    Keybind.KeyButton.Text = Keybind.CurrentKey.Name
+                    if Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
+                        Keybind.KeyButton.Text = "RIGHT CLICK"
+                    elseif Keybind.CurrentKey.Name then
+                        Keybind.KeyButton.Text = Keybind.CurrentKey.Name
+                    else
+                        Keybind.KeyButton.Text = tostring(Keybind.CurrentKey)
+                    end
                     Keybind.KeyButton.TextColor3 = Theme.AccentColor
                     Keybind.KeyButton.UIStroke.Color = Theme.AccentColor
                     Keybind.KeyButton.UIStroke.Transparency = 0.3
@@ -949,6 +956,7 @@ function NeverloseUI:CreateWindow(config)
                     Keybind.StatusLabel.Text = "No key bound"
                 end
             end
+            
             -- Enhanced key recording functionality
             Keybind.KeyButton.MouseButton1Click:Connect(function()
                 if Keybind.Recording then return end
@@ -971,32 +979,66 @@ function NeverloseUI:CreateWindow(config)
                     local pulse = math.sin(tick() * 6) * 0.5 + 0.5
                     Keybind.KeyButton.UIStroke.Transparency = 0.2 + pulse * 0.3
                 end)
+                
                 inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
                     if gameProcessed or not Keybind.Recording then return end
-
-                    -- ACCEPT ONLY RIGHT CLICK AND KEYBOARD
-                    if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                        -- Set to right mouse button
-                        Keybind.CurrentKey = Enum.KeyCode.MouseButton2
+                    
+                    -- Handle keyboard input
+                    if input.UserInputType == Enum.UserInputType.Keyboard then
+                        if input.KeyCode == Enum.KeyCode.Escape then
+                            -- Clear keybind
+                            Keybind.CurrentKey = nil
+                            Keybind.StatusLabel.Text = "Keybind cleared"
+                        else
+                            -- Set new keybind
+                            Keybind.CurrentKey = input.KeyCode
+                            Keybind.StatusLabel.Text = "Key bound: " .. input.KeyCode.Name
+                        end
+                    -- Handle mouse input - only right click
+                    elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                        -- Set right mouse button as keybind
+                        Keybind.CurrentKey = Enum.UserInputType.MouseButton2
                         Keybind.StatusLabel.Text = "Key bound: Right Click"
-                        Keybind.Recording = false
-                        -- Animate back to normal
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
-                            BackgroundColor3 = Theme.InputBg,
-                            Size = UDim2.new(0, 110, 0, 38)
-                        }):Play()
-                        UpdateKeyDisplay()
-                        if inputConnection then
-                            inputConnection:Disconnect()
-                            inputConnection = nil
-                        end
-                        -- Setup key detection for the new key
-                        if keyConnection then
-                            keyConnection:Disconnect()
-                        end
+                    -- Ignore left and middle mouse buttons
+                    elseif input.UserInputType == Enum.UserInputType.MouseButton1 or 
+                           input.UserInputType == Enum.UserInputType.MouseButton3 then
+                        return
+                    end
+                    
+                    Keybind.Recording = false
+                    -- Animate back to normal
+                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
+                        BackgroundColor3 = Theme.InputBg,
+                        Size = UDim2.new(0, 110, 0, 38)
+                    }):Play()
+                    UpdateKeyDisplay()
+                    if inputConnection then
+                        inputConnection:Disconnect()
+                        inputConnection = nil
+                    end
+                    -- Setup key detection for the new key
+                    if keyConnection then
+                        keyConnection:Disconnect()
+                    end
+                    if Keybind.CurrentKey then
                         keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
                             if processed then return end
-                            if keyInput.KeyCode == Keybind.CurrentKey then
+                            
+                            -- Check for keyboard keys
+                            if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
+                               keyInput.KeyCode == Keybind.CurrentKey then
+                                -- Visual feedback when key is pressed
+                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                                    BackgroundColor3 = Theme.AccentColor
+                                }):Play()
+                                wait(0.1)
+                                NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                                    BackgroundColor3 = Theme.InputBg
+                                }):Play()
+                                if callback then callback(Keybind.CurrentKey) end
+                            -- Check for right mouse button
+                            elseif keyInput.UserInputType == Enum.UserInputType.MouseButton2 and 
+                                   Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
                                 -- Visual feedback when key is pressed
                                 NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
                                     BackgroundColor3 = Theme.AccentColor
@@ -1008,58 +1050,9 @@ function NeverloseUI:CreateWindow(config)
                                 if callback then callback(Keybind.CurrentKey) end
                             end
                         end)
-                        return
-                    end
-
-                    -- IGNORE LEFT AND MIDDLE CLICK
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton3 then
-                        return
-                    end
-
-                    -- HANDLE KEYBOARD INPUT
-                    if input.UserInputType == Enum.UserInputType.Keyboard then
-                        if input.KeyCode == Enum.KeyCode.Escape then
-                            -- Clear keybind
-                            Keybind.CurrentKey = nil
-                            Keybind.StatusLabel.Text = "Keybind cleared"
-                        else
-                            -- Set new keybind
-                            Keybind.CurrentKey = input.KeyCode
-                            Keybind.StatusLabel.Text = "Key bound: " .. input.KeyCode.Name
-                        end
-                        Keybind.Recording = false
-                        -- Animate back to normal
-                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
-                            BackgroundColor3 = Theme.InputBg,
-                            Size = UDim2.new(0, 110, 0, 38)
-                        }):Play()
-                        UpdateKeyDisplay()
-                        if inputConnection then
-                            inputConnection:Disconnect()
-                            inputConnection = nil
-                        end
-                        -- Setup key detection for the new key
-                        if keyConnection then
-                            keyConnection:Disconnect()
-                        end
-                        if Keybind.CurrentKey then
-                            keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
-                                if processed then return end
-                                if keyInput.KeyCode == Keybind.CurrentKey then
-                                    -- Visual feedback when key is pressed
-                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
-                                        BackgroundColor3 = Theme.AccentColor
-                                    }):Play()
-                                    wait(0.1)
-                                    NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
-                                        BackgroundColor3 = Theme.InputBg
-                                    }):Play()
-                                    if callback then callback(Keybind.CurrentKey) end
-                                end
-                            end)
-                        end
                     end
                 end)
+                
                 -- Auto-timeout after 8 seconds
                 spawn(function()
                     wait(8)
@@ -1078,6 +1071,7 @@ function NeverloseUI:CreateWindow(config)
                     end
                 end)
             end)
+            
             -- Enhanced hover effects
             Keybind.KeyButton.MouseEnter:Connect(function()
                 if not Keybind.Recording then
@@ -1093,12 +1087,28 @@ function NeverloseUI:CreateWindow(config)
                     }):Play()
                 end
             end)
+            
             -- Setup initial key detection if default key exists
             UpdateKeyDisplay()
             if defaultKey then
                 keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
                     if processed then return end
-                    if keyInput.KeyCode == Keybind.CurrentKey then
+                    
+                    -- Check for keyboard keys
+                    if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
+                       keyInput.KeyCode == Keybind.CurrentKey then
+                        -- Visual feedback when key is pressed
+                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                            BackgroundColor3 = Theme.AccentColor
+                        }):Play()
+                        wait(0.1)
+                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                            BackgroundColor3 = Theme.InputBg
+                        }):Play()
+                        if callback then callback(Keybind.CurrentKey) end
+                    -- Check for right mouse button
+                    elseif keyInput.UserInputType == Enum.UserInputType.MouseButton2 and 
+                           Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
                         -- Visual feedback when key is pressed
                         NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
                             BackgroundColor3 = Theme.AccentColor
@@ -1111,6 +1121,7 @@ function NeverloseUI:CreateWindow(config)
                     end
                 end)
             end
+            
             Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 74)
             return Keybind
         end
