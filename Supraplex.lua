@@ -1089,6 +1089,19 @@ function NeverloseUI:CreateWindow(config)
             
             local function UpdateKeyDisplay()
                 if Keybind.CurrentKey then
+                    if Keybind.CurrentKey.EnumType == Enum.KeyCode then
+                        Keybind.KeyButton.Text = Keybind.CurrentKey.Name
+                    elseif Keybind.CurrentKey.EnumType == Enum.UserInputType then
+                        if Keybind.CurrentKey == Enum.UserInputType.MouseButton1 then
+                            Keybind.KeyButton.Text = "Left Mouse"
+                        elseif Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
+                            Keybind.KeyButton.Text = "Right Mouse"
+                        elseif Keybind.CurrentKey == Enum.UserInputType.MouseButton3 then
+                            Keybind.KeyButton.Text = "Middle Mouse"
+                        else
+                            Keybind.KeyButton.Text = Keybind.CurrentKey.Name
+                        end
+                    end
                     Keybind.KeyButton.Text = Keybind.CurrentKey.Name
                     Keybind.KeyButton.TextColor3 = Theme.AccentColor
                     Keybind.KeyButton.UIStroke.Color = Theme.AccentColor
@@ -1145,7 +1158,11 @@ function NeverloseUI:CreateWindow(config)
                         end
                         
                         Keybind.Recording = false
-                        
+
+                    elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                        Keybind.CurrentKey = Enum.UserInputType.MouseButton2
+                        Keybind.StatusLabel.Text = "Key bound: Right Mouse"
+                        Keybind.Recording = false
                         -- Animate back to normal
                         NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
                             BackgroundColor3 = Theme.InputBg,
