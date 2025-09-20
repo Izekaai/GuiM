@@ -1168,6 +1168,7 @@ function NeverloseUI:CreateWindow(config)
                             BackgroundColor3 = Theme.InputBg,
                             Size = UDim2.new(0, 110, 0, 38)
                         }):Play()
+                    end
                         
                         UpdateKeyDisplay()
                         
@@ -1247,8 +1248,25 @@ function NeverloseUI:CreateWindow(config)
             if defaultKey then
                 keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
                     if processed then return end
-                    if keyInput.KeyCode == Keybind.CurrentKey then
-                        -- Visual feedback when key is pressed
+                    
+                    -- Handle keyboard default keys
+                    if defaultKey.EnumType == Enum.KeyCode and keyInput.KeyCode == Keybind.CurrentKey then
+                        -- Visual feedback
+                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
+                            BackgroundColor3 = Theme.AccentColor
+                        }):Play()
+                        
+                        wait(0.1)
+                        
+                        NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
+                            BackgroundColor3 = Theme.InputBg
+                        }):Play()
+                        
+                        if callback then callback(Keybind.CurrentKey) end
+                    
+                    -- Handle mouse default keys
+                    elseif defaultKey.EnumType == Enum.UserInputType and keyInput.UserInputType == Keybind.CurrentKey then
+                        -- Visual feedback
                         NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
                             BackgroundColor3 = Theme.AccentColor
                         }):Play()
