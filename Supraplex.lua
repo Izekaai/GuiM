@@ -1,8 +1,3 @@
---[[
-    Enhanced Neverlose UI Library Template
-    Polished design matching Neverlose.cc interface
-    Fixed keybind recorder and improved visual elements
-]]
 local NeverloseUI = {}
 local Objects = {
     Background = {},
@@ -14,22 +9,20 @@ local Objects = {
     ButtonBg = {},
     InputBg = {}
 }
--- Enhanced Theme Configuration (More accurate Neverlose colors)
 local Theme = {
-    Background = Color3.fromRGB(13, 17, 23),           -- Darker main background
-    SidebarBg = Color3.fromRGB(16, 20, 26),            -- Sidebar background
-    ContentBg = Color3.fromRGB(19, 23, 29),            -- Content area background
-    AccentColor = Color3.fromRGB(88, 166, 255),        -- Blue accent (Neverlose primary)
-    SecondaryAccent = Color3.fromRGB(147, 103, 255),   -- Purple accent
-    TextColor = Color3.fromRGB(255, 255, 255),         -- White text
-    SubTextColor = Color3.fromRGB(156, 163, 175),      -- Light gray subtext
-    ButtonBg = Color3.fromRGB(31, 41, 55),             -- Button background
-    InputBg = Color3.fromRGB(17, 24, 39),              -- Input field background
-    BorderColor = Color3.fromRGB(55, 65, 81),          -- Border color
-    HoverColor = Color3.fromRGB(37, 47, 63),           -- Hover state
-    ActiveColor = Color3.fromRGB(29, 78, 216),         -- Active/selected state
+    Background = Color3.fromRGB(13, 17, 23),
+    SidebarBg = Color3.fromRGB(16, 20, 26),
+    ContentBg = Color3.fromRGB(19, 23, 29),
+    AccentColor = Color3.fromRGB(88, 166, 255),
+    SecondaryAccent = Color3.fromRGB(147, 103, 255),
+    TextColor = Color3.fromRGB(255, 255, 255),
+    SubTextColor = Color3.fromRGB(156, 163, 175),
+    ButtonBg = Color3.fromRGB(31, 41, 55),
+    InputBg = Color3.fromRGB(17, 24, 39),
+    BorderColor = Color3.fromRGB(55, 65, 81),
+    HoverColor = Color3.fromRGB(37, 47, 63),
+    ActiveColor = Color3.fromRGB(29, 78, 216),
 }
--- Services
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -37,7 +30,6 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
--- Utility Functions
 function NeverloseUI:Create(className, properties)
     local instance = Instance.new(className)
     for property, value in pairs(properties) do
@@ -53,7 +45,6 @@ end
 function NeverloseUI:Tween(object, info, properties)
     return TweenService:Create(object, info, properties)
 end
--- Enhanced Animation Functions
 function NeverloseUI:CreateSmoothTween(object, duration, properties)
     local tweenInfo = TweenInfo.new(
         duration or 0.3,
@@ -69,14 +60,12 @@ function NeverloseUI:CreateBounceEffect(object, scale)
     wait(0.1)
     self:CreateSmoothTween(object, 0.2, {Size = originalSize}):Play()
 end
--- Main Window Creation
 function NeverloseUI:CreateWindow(config)
     config = config or {}
     local windowName = config.Name or "NEVERLOSE"
     local windowSize = config.Size or UDim2.new(0, 900, 0, 650)
     local Window = {}
     local currentTab = nil
-    -- Main ScreenGui with enhanced properties
     Window.ScreenGui = self:Create("ScreenGui", {
         Name = windowName,
         Parent = CoreGui,
@@ -84,7 +73,6 @@ function NeverloseUI:CreateWindow(config)
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         IgnoreGuiInset = true
     })
-    -- Background blur effect frame
     Window.BlurFrame = self:Create("Frame", {
         Name = "BlurFrame",
         Parent = Window.ScreenGui,
@@ -94,7 +82,6 @@ function NeverloseUI:CreateWindow(config)
         BorderSizePixel = 0,
         ZIndex = 0
     })
-    -- Main Frame with enhanced shadow
     Window.MainFrame = self:Create("Frame", {
         Name = "MainFrame",
         Parent = Window.ScreenGui,
@@ -106,12 +93,10 @@ function NeverloseUI:CreateWindow(config)
         ZIndex = 1
     })
     table.insert(Objects.Background, Window.MainFrame)
-    -- Enhanced corner rounding
     self:Create("UICorner", {
         Parent = Window.MainFrame,
         CornerRadius = UDim.new(0, 8)
     })
-    -- Enhanced drop shadow with gradient effect
     Window.ShadowFrame = self:Create("Frame", {
         Name = "ShadowFrame",
         Parent = Window.ScreenGui,
@@ -127,14 +112,12 @@ function NeverloseUI:CreateWindow(config)
         Parent = Window.ShadowFrame,
         CornerRadius = UDim.new(0, 15)
     })
-    -- Subtle border glow
     self:Create("UIStroke", {
         Parent = Window.MainFrame,
         Color = Theme.AccentColor,
         Thickness = 1,
         Transparency = 0.8
     })
-    -- Enhanced Title Bar
     Window.TitleBar = self:Create("Frame", {
         Name = "TitleBar",
         Parent = Window.MainFrame,
@@ -147,7 +130,6 @@ function NeverloseUI:CreateWindow(config)
         Parent = Window.TitleBar,
         CornerRadius = UDim.new(0, 8)
     })
-    -- Title bar bottom should be square
     self:Create("Frame", {
         Parent = Window.TitleBar,
         Position = UDim2.new(0, 0, 0.6, 0),
@@ -155,7 +137,6 @@ function NeverloseUI:CreateWindow(config)
         BackgroundColor3 = Theme.SidebarBg,
         BorderSizePixel = 0
     })
-    -- Enhanced Window Title with icon
     Window.TitleIcon = self:Create("Frame", {
         Name = "TitleIcon",
         Parent = Window.TitleBar,
@@ -182,7 +163,6 @@ function NeverloseUI:CreateWindow(config)
         TextXAlignment = Enum.TextXAlignment.Left
     })
     table.insert(Objects.TextColor, Window.Title)
-    -- Enhanced minimize and close buttons
     Window.MinimizeButton = self:Create("TextButton", {
         Name = "MinimizeButton",
         Parent = Window.TitleBar,
@@ -217,7 +197,6 @@ function NeverloseUI:CreateWindow(config)
         Parent = Window.CloseButton,
         CornerRadius = UDim.new(0, 4)
     })
-    -- Enhanced Sidebar with better styling
     Window.Sidebar = self:Create("Frame", {
         Name = "Sidebar",
         Parent = Window.MainFrame,
@@ -227,7 +206,6 @@ function NeverloseUI:CreateWindow(config)
         BorderSizePixel = 0
     })
     table.insert(Objects.SidebarBg, Window.Sidebar)
-    -- Enhanced Content Area
     Window.ContentArea = self:Create("Frame", {
         Name = "ContentArea",
         Parent = Window.MainFrame,
@@ -237,7 +215,6 @@ function NeverloseUI:CreateWindow(config)
         BorderSizePixel = 0
     })
     table.insert(Objects.ContentBg, Window.ContentArea)
-    -- Add subtle separator between sidebar and content
     self:Create("Frame", {
         Parent = Window.MainFrame,
         Position = UDim2.new(0, 219, 0, 40),
@@ -245,12 +222,10 @@ function NeverloseUI:CreateWindow(config)
         BackgroundColor3 = Theme.BorderColor,
         BorderSizePixel = 0
     })
-    -- Content area corner rounding
     self:Create("UICorner", {
         Parent = Window.ContentArea,
         CornerRadius = UDim.new(0, 8)
     })
-    -- Fix content area corners
     self:Create("Frame", {
         Parent = Window.ContentArea,
         Position = UDim2.new(0, -8, 0, 0),
@@ -265,7 +240,6 @@ function NeverloseUI:CreateWindow(config)
         BackgroundColor3 = Theme.ContentBg,
         BorderSizePixel = 0
     })
-    -- Enhanced Tab Container in Sidebar with search functionality
     Window.SearchFrame = self:Create("Frame", {
         Name = "SearchFrame",
         Parent = Window.Sidebar,
@@ -322,7 +296,6 @@ function NeverloseUI:CreateWindow(config)
         Parent = Window.TabContainer,
         PaddingTop = UDim.new(0, 5)
     })
-    -- Enhanced dragging functionality
     local dragging = false
     local dragStart = nil
     local startPos = nil
@@ -345,18 +318,16 @@ function NeverloseUI:CreateWindow(config)
             dragging = false
         end
     end)
-    -- Button hover effects
     local function setupButtonHover(button, hoverColor, normalColor)
         button.MouseEnter:Connect(function()
             self:CreateSmoothTween(button, 0.2, {BackgroundColor3 = hoverColor}):Play()
         end)
         button.MouseLeave:Connect(function()
             self:CreateSmoothTween(button, 0.2, {BackgroundColor3 = normalColor}):Play()
-        end)
+        end
     end
     setupButtonHover(Window.MinimizeButton, Theme.HoverColor, Theme.ButtonBg)
     setupButtonHover(Window.CloseButton, Color3.fromRGB(185, 28, 28), Color3.fromRGB(220, 53, 69))
-    -- Window minimize/maximize functionality
     local isMinimized = false
     local originalSize = windowSize
     Window.MinimizeButton.MouseButton1Click:Connect(function()
@@ -371,7 +342,6 @@ function NeverloseUI:CreateWindow(config)
             Window.MinimizeButton.Text = "─"
         end
     end)
-    -- Close button functionality with animation
     Window.CloseButton.MouseButton1Click:Connect(function()
         self:CreateSmoothTween(Window.MainFrame, 0.3, {
             Size = UDim2.new(0, 0, 0, 0),
@@ -385,11 +355,9 @@ function NeverloseUI:CreateWindow(config)
         wait(0.3)
         Window.ScreenGui:Destroy()
     end)
-    -- Enhanced Tab Creation Function
     function Window:CreateTab(tabName, iconText)
         local Tab = {}
         iconText = iconText or "●"
-        -- Enhanced Tab Button with icon
         Tab.Button = NeverloseUI:Create("TextButton", {
             Name = tabName,
             Parent = Window.TabContainer,
@@ -405,7 +373,6 @@ function NeverloseUI:CreateWindow(config)
             Parent = Tab.Button,
             CornerRadius = UDim.new(0, 6)
         })
-        -- Tab icon
         Tab.Icon = NeverloseUI:Create("TextLabel", {
             Parent = Tab.Button,
             Position = UDim2.new(0, 15, 0, 0),
@@ -417,7 +384,6 @@ function NeverloseUI:CreateWindow(config)
             TextSize = 16,
             TextXAlignment = Enum.TextXAlignment.Center
         })
-        -- Tab label
         Tab.Label = NeverloseUI:Create("TextLabel", {
             Parent = Tab.Button,
             Position = UDim2.new(0, 45, 0, 0),
@@ -429,7 +395,6 @@ function NeverloseUI:CreateWindow(config)
             TextSize = 14,
             TextXAlignment = Enum.TextXAlignment.Left
         })
-        -- Active indicator
         Tab.ActiveIndicator = NeverloseUI:Create("Frame", {
             Parent = Tab.Button,
             Position = UDim2.new(0, 0, 0, 0),
@@ -442,7 +407,6 @@ function NeverloseUI:CreateWindow(config)
             Parent = Tab.ActiveIndicator,
             CornerRadius = UDim.new(0, 2)
         })
-        -- Enhanced Tab Content with better scrolling
         Tab.Content = NeverloseUI:Create("ScrollingFrame", {
             Name = tabName .. "Content",
             Parent = Window.ContentArea,
@@ -468,11 +432,8 @@ function NeverloseUI:CreateWindow(config)
             PaddingTop = UDim.new(0, 25),
             PaddingBottom = UDim.new(0, 25)
         })
-        -- Enhanced Tab Selection Logic with animations
         Tab.Button.MouseButton1Click:Connect(function()
-            -- Animate click
             NeverloseUI:CreateBounceEffect(Tab.Button, 0.96)
-            -- Hide all tabs and reset buttons
             for _, child in pairs(Window.ContentArea:GetChildren()) do
                 if child:IsA("ScrollingFrame") then
                     child.Visible = false
@@ -481,7 +442,6 @@ function NeverloseUI:CreateWindow(config)
             for _, child in pairs(Window.TabContainer:GetChildren()) do
                 if child:IsA("TextButton") then
                     NeverloseUI:CreateSmoothTween(child, 0.2, {BackgroundColor3 = Theme.ButtonBg}):Play()
-                    -- Reset text colors
                     if child:FindFirstChild("Icon") then
                         NeverloseUI:CreateSmoothTween(child.Icon, 0.2, {TextColor3 = Theme.SubTextColor}):Play()
                     end
@@ -493,7 +453,6 @@ function NeverloseUI:CreateWindow(config)
                     end
                 end
             end
-            -- Activate current tab with smooth transition
             Tab.Content.Visible = true
             NeverloseUI:CreateSmoothTween(Tab.Button, 0.2, {BackgroundColor3 = Theme.ActiveColor}):Play()
             NeverloseUI:CreateSmoothTween(Tab.Icon, 0.2, {TextColor3 = Theme.TextColor}):Play()
@@ -501,7 +460,6 @@ function NeverloseUI:CreateWindow(config)
             Tab.ActiveIndicator.Visible = true
             currentTab = Tab
         end)
-        -- Enhanced hover effect
         Tab.Button.MouseEnter:Connect(function()
             if currentTab ~= Tab then
                 NeverloseUI:CreateSmoothTween(Tab.Button, 0.2, {BackgroundColor3 = Theme.HoverColor}):Play()
@@ -512,7 +470,6 @@ function NeverloseUI:CreateWindow(config)
                 NeverloseUI:CreateSmoothTween(Tab.Button, 0.2, {BackgroundColor3 = Theme.ButtonBg}):Play()
             end
         end)
-        -- Auto-select first tab
         if currentTab == nil then
             Tab.Button.BackgroundColor3 = Theme.ActiveColor
             Tab.Icon.TextColor3 = Theme.TextColor
@@ -521,9 +478,7 @@ function NeverloseUI:CreateWindow(config)
             Tab.Content.Visible = true
             currentTab = Tab
         end
-        -- Update canvas size
         Window.TabContainer.CanvasSize = UDim2.new(0, 0, 0, Window.TabContainer.UIListLayout.AbsoluteContentSize.Y + 15)
-        -- Enhanced UI Elements Creation Functions
         function Tab:CreateSection(sectionName)
             local Section = {}
             Section.Frame = NeverloseUI:Create("Frame", {
@@ -584,7 +539,6 @@ function NeverloseUI:CreateWindow(config)
                 Thickness = 1,
                 Transparency = 0.7
             })
-            -- Enhanced hover and click effects
             Button.MouseEnter:Connect(function()
                 NeverloseUI:CreateSmoothTween(Button, 0.2, {
                     BackgroundColor3 = Theme.HoverColor,
@@ -637,7 +591,6 @@ function NeverloseUI:CreateWindow(config)
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             table.insert(Objects.TextColor, Toggle.Label)
-            -- Enhanced toggle switch design
             Toggle.SwitchBg = NeverloseUI:Create("Frame", {
                 Parent = Toggle.Frame,
                 AnchorPoint = Vector2.new(1, 0.5),
@@ -662,7 +615,6 @@ function NeverloseUI:CreateWindow(config)
                 Parent = Toggle.SwitchKnob,
                 CornerRadius = UDim.new(1, 0)
             })
-            -- Subtle shadow for the knob
             NeverloseUI:Create("UIStroke", {
                 Parent = Toggle.SwitchKnob,
                 Color = Color3.fromRGB(0, 0, 0),
@@ -675,7 +627,6 @@ function NeverloseUI:CreateWindow(config)
                 local targetPosition = Toggle.State and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
                 NeverloseUI:CreateSmoothTween(Toggle.SwitchBg, 0.25, {BackgroundColor3 = targetColor}):Play()
                 NeverloseUI:CreateSmoothTween(Toggle.SwitchKnob, 0.25, {Position = targetPosition}):Play()
-                -- Add subtle scale animation to knob
                 NeverloseUI:CreateSmoothTween(Toggle.SwitchKnob, 0.1, {Size = UDim2.new(0, 18, 0, 18)}):Play()
                 wait(0.1)
                 NeverloseUI:CreateSmoothTween(Toggle.SwitchKnob, 0.15, {Size = UDim2.new(0, 20, 0, 20)}):Play()
@@ -687,7 +638,6 @@ function NeverloseUI:CreateWindow(config)
                 Text = "",
                 AutoButtonColor = false
             })
-            -- Enhanced hover effect
             Toggle.Button.MouseEnter:Connect(function()
                 NeverloseUI:CreateSmoothTween(Toggle.Frame, 0.2, {BackgroundColor3 = Theme.HoverColor}):Play()
             end)
@@ -729,7 +679,6 @@ function NeverloseUI:CreateWindow(config)
                 Thickness = 1,
                 Transparency = 0.8
             })
-            -- Header with label and value
             Slider.HeaderFrame = NeverloseUI:Create("Frame", {
                 Parent = Slider.Frame,
                 Position = UDim2.new(0, 18, 0, 8),
@@ -747,7 +696,6 @@ function NeverloseUI:CreateWindow(config)
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             table.insert(Objects.TextColor, Slider.Label)
-            -- Enhanced value display with background
             Slider.ValueFrame = NeverloseUI:Create("Frame", {
                 Parent = Slider.HeaderFrame,
                 AnchorPoint = Vector2.new(1, 0),
@@ -771,7 +719,6 @@ function NeverloseUI:CreateWindow(config)
                 TextXAlignment = Enum.TextXAlignment.Center
             })
             table.insert(Objects.AccentColor, Slider.ValueDisplay)
-            -- Enhanced track design
             Slider.TrackBg = NeverloseUI:Create("Frame", {
                 Parent = Slider.Frame,
                 Position = UDim2.new(0, 18, 0, 45),
@@ -783,7 +730,6 @@ function NeverloseUI:CreateWindow(config)
                 Parent = Slider.TrackBg,
                 CornerRadius = UDim.new(1, 0)
             })
-            -- Fill bar with gradient effect
             Slider.Fill = NeverloseUI:Create("Frame", {
                 Parent = Slider.TrackBg,
                 Size = UDim2.new((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0),
@@ -795,7 +741,6 @@ function NeverloseUI:CreateWindow(config)
                 Parent = Slider.Fill,
                 CornerRadius = UDim.new(1, 0)
             })
-            -- Enhanced slider knob with glow effect
             Slider.Knob = NeverloseUI:Create("Frame", {
                 Parent = Slider.TrackBg,
                 AnchorPoint = Vector2.new(0.5, 0.5),
@@ -809,7 +754,6 @@ function NeverloseUI:CreateWindow(config)
                 Parent = Slider.Knob,
                 CornerRadius = UDim.new(1, 0)
             })
-            -- Knob glow effect
             NeverloseUI:Create("UIStroke", {
                 Parent = Slider.Knob,
                 Color = Theme.AccentColor,
@@ -838,12 +782,10 @@ function NeverloseUI:CreateWindow(config)
                 local percent = math.clamp((input.Position.X - trackPos.X) / trackSize.X, 0, 1)
                 UpdateSlider(percent, false)
             end
-            -- Enhanced drag functionality
             Slider.TrackBg.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     isDragging = true
                     HandleInput(input)
-                    -- Animate knob scale on grab
                     NeverloseUI:CreateSmoothTween(Slider.Knob, 0.1, {Size = UDim2.new(0, 20, 0, 20)}):Play()
                 end
             end)
@@ -855,7 +797,6 @@ function NeverloseUI:CreateWindow(config)
             UserInputService.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 and isDragging then
                     isDragging = false
-                    -- Animate knob back to normal size
                     NeverloseUI:CreateSmoothTween(Slider.Knob, 0.15, {Size = UDim2.new(0, 16, 0, 16)}):Play()
                 end
             end)
@@ -894,7 +835,6 @@ function NeverloseUI:CreateWindow(config)
 				TextXAlignment = Enum.TextXAlignment.Left
 			})
 			table.insert(Objects.TextColor, Keybind.Label)
-			-- Status indicator
 			Keybind.StatusLabel = NeverloseUI:Create("TextLabel", {
 				Parent = Keybind.Frame,
 				Position = UDim2.new(0, 18, 0, 28),
@@ -906,7 +846,6 @@ function NeverloseUI:CreateWindow(config)
 				TextSize = 11,
 				TextXAlignment = Enum.TextXAlignment.Left
 			})
-			-- Enhanced key display button
 			Keybind.KeyButton = NeverloseUI:Create("TextButton", {
 				Parent = Keybind.Frame,
 				AnchorPoint = Vector2.new(1, 0),
@@ -935,10 +874,9 @@ function NeverloseUI:CreateWindow(config)
 			local inputConnection = nil
 			local keyConnection = nil
 			local holdConnection = nil
-			local isKeyHeld = false  -- Track if key is currently held
+			local isKeyHeld = false
 			local lastTriggerTime = 0
-			local triggerInterval = 0.05  -- Time between triggers while holding
-			
+			local triggerInterval = 0.05
 			local function UpdateKeyDisplay()
 				if Keybind.CurrentKey then
 					if Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
@@ -960,27 +898,21 @@ function NeverloseUI:CreateWindow(config)
 					Keybind.StatusLabel.Text = "No key bound"
 				end
 			end
-			
 			local function SetupKeyDetection()
-				-- Clean up existing connections
 				if keyConnection then
 					keyConnection:Disconnect()
 				end
 				if holdConnection then
 					holdConnection:Disconnect()
 				end
-				
 				if not Keybind.CurrentKey then return end
-				
 				if Keybind.CurrentKey == Enum.UserInputType.MouseButton2 then
-					-- For right mouse button - use InputBegan/InputEnded pattern
 					keyConnection = UserInputService.InputBegan:Connect(function(input, processed)
 						if processed then return end
 						if input.UserInputType == Enum.UserInputType.MouseButton2 then
 							if not isKeyHeld then
 								isKeyHeld = true
 								lastTriggerTime = tick()
-								-- Visual feedback
 								NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
 									BackgroundColor3 = Theme.AccentColor
 								}):Play()
@@ -988,8 +920,6 @@ function NeverloseUI:CreateWindow(config)
 							end
 						end
 					end)
-					
-					-- Setup InputEnded for right mouse button
 					local endConnection = UserInputService.InputEnded:Connect(function(input)
 						if input.UserInputType == Enum.UserInputType.MouseButton2 then
 							isKeyHeld = false
@@ -998,8 +928,6 @@ function NeverloseUI:CreateWindow(config)
 							}):Play()
 						end
 					end)
-					
-					-- Setup hold detection for right mouse button
 					holdConnection = RunService.Heartbeat:Connect(function()
 						if isKeyHeld then
 							local currentTime = tick()
@@ -1009,9 +937,7 @@ function NeverloseUI:CreateWindow(config)
 							end
 						end
 					end)
-					
 				else
-					-- For keyboard keys
 					keyConnection = UserInputService.InputBegan:Connect(function(keyInput, processed)
 						if processed then return end
 						if keyInput.UserInputType == Enum.UserInputType.Keyboard and 
@@ -1019,7 +945,6 @@ function NeverloseUI:CreateWindow(config)
 							if not isKeyHeld then
 								isKeyHeld = true
 								lastTriggerTime = tick()
-								-- Visual feedback
 								NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.1, {
 									BackgroundColor3 = Theme.AccentColor
 								}):Play()
@@ -1027,8 +952,6 @@ function NeverloseUI:CreateWindow(config)
 							end
 						end
 					end)
-					
-					-- Setup InputEnded for keyboard keys
 					local endConnection = UserInputService.InputEnded:Connect(function(input)
 						if input.UserInputType == Enum.UserInputType.Keyboard and
 						   input.KeyCode == Keybind.CurrentKey then
@@ -1038,8 +961,6 @@ function NeverloseUI:CreateWindow(config)
 							}):Play()
 						end
 					end)
-					
-					-- Setup hold detection for keyboard keys  
 					holdConnection = RunService.Heartbeat:Connect(function()
 						if isKeyHeld then
 							local currentTime = tick()
@@ -1051,21 +972,17 @@ function NeverloseUI:CreateWindow(config)
 					end)
 				end
 			end
-			
-			-- Enhanced key recording functionality
 			Keybind.KeyButton.MouseButton1Click:Connect(function()
 				if Keybind.Recording then return end
 				Keybind.Recording = true
-				isKeyHeld = false  -- Reset held state
+				isKeyHeld = false
 				Keybind.KeyButton.Text = "PRESS KEY..."
 				Keybind.KeyButton.TextColor3 = Theme.TextColor
 				Keybind.StatusLabel.Text = "Listening for key input..."
-				-- Enhanced recording animation
 				NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
 					BackgroundColor3 = Theme.AccentColor,
 					Size = UDim2.new(0, 115, 0, 40)
 				}):Play()
-				-- Pulsing effect during recording
 				local pulseConnection
 				pulseConnection = RunService.Heartbeat:Connect(function()
 					if not Keybind.Recording then
@@ -1075,35 +992,25 @@ function NeverloseUI:CreateWindow(config)
 					local pulse = math.sin(tick() * 6) * 0.5 + 0.5
 					Keybind.KeyButton.UIStroke.Transparency = 0.2 + pulse * 0.3
 				end)
-				
 				inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
 					if gameProcessed or not Keybind.Recording then return end
-					
-					-- Handle keyboard input
 					if input.UserInputType == Enum.UserInputType.Keyboard then
 						if input.KeyCode == Enum.KeyCode.Escape then
-							-- Clear keybind
 							Keybind.CurrentKey = nil
 							Keybind.StatusLabel.Text = "Keybind cleared"
 						else
-							-- Set new keybind
 							Keybind.CurrentKey = input.KeyCode
 							Keybind.StatusLabel.Text = "Key bound: " .. input.KeyCode.Name
 						end
-					-- Handle mouse input - only right click
 					elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-						-- Set right mouse button as keybind
 						Keybind.CurrentKey = Enum.UserInputType.MouseButton2
 						Keybind.StatusLabel.Text = "Key bound: Right Click"
-					-- Ignore left and middle mouse buttons
 					elseif input.UserInputType == Enum.UserInputType.MouseButton1 or 
 						   input.UserInputType == Enum.UserInputType.MouseButton3 then
 						return
 					end
-					
 					Keybind.Recording = false
-					isKeyHeld = false  -- Reset held state
-					-- Animate back to normal
+					isKeyHeld = false
 					NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
 						BackgroundColor3 = Theme.InputBg,
 						Size = UDim2.new(0, 110, 0, 38)
@@ -1113,16 +1020,13 @@ function NeverloseUI:CreateWindow(config)
 						inputConnection:Disconnect()
 						inputConnection = nil
 					end
-					-- Setup key detection for the new key
 					SetupKeyDetection()
 				end)
-				
-				-- Auto-timeout after 8 seconds
 				spawn(function()
 					wait(8)
 					if Keybind.Recording then
 						Keybind.Recording = false
-						isKeyHeld = false  -- Reset held state
+						isKeyHeld = false
 						Keybind.StatusLabel.Text = "Recording timed out"
 						NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.3, {
 							BackgroundColor3 = Theme.InputBg,
@@ -1136,8 +1040,6 @@ function NeverloseUI:CreateWindow(config)
 					end
 				end)
 			end)
-			
-			-- Enhanced hover effects
 			Keybind.KeyButton.MouseEnter:Connect(function()
 				if not Keybind.Recording and not isKeyHeld then
 					NeverloseUI:CreateSmoothTween(Keybind.KeyButton, 0.2, {
@@ -1152,13 +1054,10 @@ function NeverloseUI:CreateWindow(config)
 					}):Play()
 				end
 			end)
-			
-			-- Setup initial key detection if default key exists
 			UpdateKeyDisplay()
 			if defaultKey then
 				SetupKeyDetection()
 			end
-			
 			Tab.Content.CanvasSize = UDim2.new(0, 0, 0, Tab.Content.UIListLayout.AbsoluteContentSize.Y + 74)
 			return Keybind
 		end
@@ -1197,7 +1096,6 @@ function NeverloseUI:CreateWindow(config)
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             table.insert(Objects.TextColor, Dropdown.Label)
-            -- Enhanced main dropdown button
             Dropdown.Button = NeverloseUI:Create("TextButton", {
                 Parent = Dropdown.Frame,
                 Position = UDim2.new(0, 18, 0, 30),
@@ -1214,7 +1112,6 @@ function NeverloseUI:CreateWindow(config)
                 Parent = Dropdown.Button,
                 CornerRadius = UDim.new(0, 6)
             })
-            -- Selected option text
             Dropdown.SelectedText = NeverloseUI:Create("TextLabel", {
                 Parent = Dropdown.Button,
                 Position = UDim2.new(0, 12, 0, 0),
@@ -1228,21 +1125,6 @@ function NeverloseUI:CreateWindow(config)
                 ZIndex = 2
             })
             table.insert(Objects.TextColor, Dropdown.SelectedText)
-            -- Enhanced dropdown arrow with animation
-            Dropdown.Arrow = NeverloseUI:Create("ImageLabel", {
-                Parent = Dropdown.Button,
-                AnchorPoint = Vector2.new(1, 0.5),
-                Position = UDim2.new(1, -8, 0.5, 0),
-                Size = UDim2.new(0, 12, 0, 12),
-                BackgroundTransparency = 1,
-                Image = "rbxasset://textures/ui/GuiImagePlaceholder.png",
-                ImageColor3 = Theme.AccentColor,
-                Rotation = 0,
-                ZIndex = 2
-            })
-            table.insert(Objects.AccentColor, Dropdown.Arrow)
-            -- Create a simple arrow using TextLabel instead
-            Dropdown.Arrow:Destroy()
             Dropdown.Arrow = NeverloseUI:Create("TextLabel", {
                 Parent = Dropdown.Button,
                 AnchorPoint = Vector2.new(1, 0.5),
@@ -1258,7 +1140,6 @@ function NeverloseUI:CreateWindow(config)
                 ZIndex = 2
             })
             table.insert(Objects.AccentColor, Dropdown.Arrow)
-            -- Enhanced options container
             Dropdown.OptionsFrame = NeverloseUI:Create("Frame", {
                 Parent = Dropdown.Frame,
                 Position = UDim2.new(0, 18, 0, 54),
@@ -1279,7 +1160,6 @@ function NeverloseUI:CreateWindow(config)
                 Thickness = 1,
                 Transparency = 0.6
             })
-            -- Enhanced scrolling frame for options
             Dropdown.OptionsScroll = NeverloseUI:Create("ScrollingFrame", {
                 Parent = Dropdown.OptionsFrame,
                 Size = UDim2.new(1, 0, 1, 0),
@@ -1305,7 +1185,6 @@ function NeverloseUI:CreateWindow(config)
             Dropdown.IsOpen = false
             Dropdown.SelectedValue = defaultOption or options[1]
             local function CreateOptions()
-                -- Clear existing options
                 for _, child in pairs(Dropdown.OptionsScroll:GetChildren()) do
                     if child:IsA("TextButton") then
                         child:Destroy()
@@ -1334,7 +1213,6 @@ function NeverloseUI:CreateWindow(config)
                         Parent = optionButton,
                         PaddingLeft = UDim.new(0, 10)
                     })
-                    -- Enhanced option hover effects
                     optionButton.MouseEnter:Connect(function()
                         if option ~= Dropdown.SelectedValue then
                             NeverloseUI:CreateSmoothTween(optionButton, 0.15, {
@@ -1354,51 +1232,41 @@ function NeverloseUI:CreateWindow(config)
                     optionButton.MouseButton1Click:Connect(function()
                         Dropdown.SelectedValue = option
                         Dropdown.SelectedText.Text = option
-                        -- Close dropdown with animation
                         Dropdown.IsOpen = false
                         NeverloseUI:CreateSmoothTween(Dropdown.OptionsFrame, 0.25, {Size = UDim2.new(1, -36, 0, 0)}):Play()
                         NeverloseUI:CreateSmoothTween(Dropdown.Arrow, 0.25, {Rotation = 0}):Play()
                         NeverloseUI:CreateSmoothTween(Dropdown.Frame, 0.25, {Size = UDim2.new(1, 0, 0, 62)}):Play()
-                        -- Update option display
                         wait(0.1)
                         CreateOptions()
                         if callback then callback(option) end
                     end)
                 end
-                -- Update scroll canvas size
                 Dropdown.OptionsScroll.CanvasSize = UDim2.new(0, 0, 0, Dropdown.OptionsScroll.UIListLayout.AbsoluteContentSize.Y + 12)
             end
             CreateOptions()
-            -- Enhanced dropdown toggle functionality
             Dropdown.Button.MouseButton1Click:Connect(function()
                 Dropdown.IsOpen = not Dropdown.IsOpen
                 if Dropdown.IsOpen then
                     local maxHeight = 150
                     local optionsHeight = math.min(#options * 34 + 12, maxHeight)
-                    -- Animate dropdown opening
                     NeverloseUI:CreateSmoothTween(Dropdown.OptionsFrame, 0.25, {
                         Size = UDim2.new(1, -36, 0, optionsHeight)
                     }):Play()
                     NeverloseUI:CreateSmoothTween(Dropdown.Arrow, 0.25, {Rotation = 180}):Play()
-                    -- Expand parent frame
                     local newFrameHeight = 62 + optionsHeight + 5
                     NeverloseUI:CreateSmoothTween(Dropdown.Frame, 0.25, {
                         Size = UDim2.new(1, 0, 0, newFrameHeight)
                     }):Play()
-                    -- Bring dropdown to front
                     Dropdown.Frame.ZIndex = 100
                 else
-                    -- Animate dropdown closing
                     NeverloseUI:CreateSmoothTween(Dropdown.OptionsFrame, 0.25, {
                         Size = UDim2.new(1, -36, 0, 0)
                     }):Play()
                     NeverloseUI:CreateSmoothTween(Dropdown.Arrow, 0.25, {Rotation = 0}):Play()
                     NeverloseUI:CreateSmoothTween(Dropdown.Frame, 0.25, {Size = UDim2.new(1, 0, 0, 62)}):Play()
-                    -- Reset Z-index
                     Dropdown.Frame.ZIndex = 1
                 end
             end)
-            -- Enhanced hover effects for main button
             Dropdown.Button.MouseEnter:Connect(function()
                 if not Dropdown.IsOpen then
                     NeverloseUI:CreateSmoothTween(Dropdown.Button, 0.2, {
@@ -1448,7 +1316,6 @@ function NeverloseUI:CreateWindow(config)
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             table.insert(Objects.TextColor, Textbox.Label)
-            -- Enhanced text input with better styling
             Textbox.Input = NeverloseUI:Create("TextBox", {
                 Parent = Textbox.Frame,
                 Position = UDim2.new(0, 18, 0, 30),
@@ -1475,7 +1342,6 @@ function NeverloseUI:CreateWindow(config)
                 PaddingLeft = UDim.new(0, 12),
                 PaddingRight = UDim.new(0, 12)
             })
-            -- Enhanced focus effects
             Textbox.Input.Focused:Connect(function()
                 NeverloseUI:CreateSmoothTween(Textbox.Input, 0.2, {
                     BackgroundColor3 = Theme.HoverColor
@@ -1502,7 +1368,6 @@ function NeverloseUI:CreateWindow(config)
     end
     return Window
 end
--- Enhanced Theme Management with live updates
 function NeverloseUI:SetTheme(themeName, color)
     if Theme[themeName] then
         Theme[themeName] = color
@@ -1522,7 +1387,6 @@ function NeverloseUI:SetTheme(themeName, color)
         end
     end
 end
--- Additional utility functions for enhanced functionality
 function NeverloseUI:CreateNotification(title, message, duration)
     duration = duration or 5
     local notification = self:Create("Frame", {
@@ -1567,9 +1431,7 @@ function NeverloseUI:CreateNotification(title, message, duration)
         TextXAlignment = Enum.TextXAlignment.Left,
         TextWrapped = true
     })
-    -- Animate in
     self:CreateSmoothTween(notification, 0.4, {Position = UDim2.new(1, -20, 0, 20)}):Play()
-    -- Auto-dismiss
     spawn(function()
         wait(duration)
         self:CreateSmoothTween(notification, 0.4, {
@@ -1581,7 +1443,6 @@ function NeverloseUI:CreateNotification(title, message, duration)
     end)
     return notification
 end
--- Enhanced loading animation
 function NeverloseUI:CreateLoadingSpinner(parent, size)
     size = size or UDim2.new(0, 24, 0, 24)
     local spinner = self:Create("Frame", {
@@ -1609,7 +1470,6 @@ function NeverloseUI:CreateLoadingSpinner(parent, size)
             Parent = dot,
             CornerRadius = UDim.new(1, 0)
         })
-        -- Animate each dot with a delay
         spawn(function()
             while dot.Parent do
                 self:CreateSmoothTween(dot, 0.6, {BackgroundTransparency = 0.8}):Play()
@@ -1617,7 +1477,7 @@ function NeverloseUI:CreateLoadingSpinner(parent, size)
                 self:CreateSmoothTween(dot, 0.6, {BackgroundTransparency = 0}):Play()
                 wait((8 - i) * 0.1)
             end
-        end)
+            end)
     end
     return spinner
 end
